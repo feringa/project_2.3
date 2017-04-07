@@ -15,7 +15,9 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.stream.Stream;
+
+import TicTacToe.Tile;
 
 public class server extends Application{
 
@@ -24,14 +26,21 @@ public class server extends Application{
     private Boolean connected = false;
 
     private Button loginBtn;
+    public Button logoutBtn;
     public Scene LoginScene;
     public Scene TicTacToeScene;
     public Stage PrimaryStage;
 
+    public TicTacToe ttt;
 
     TextField ipAddress = new TextField();
     TextField portNumber = new TextField();
     TextField nameField = new TextField();
+
+    public static PrintWriter out;
+    public static BufferedReader in;
+
+    public static Socket socket;
 
     public static void main(String args[])
     {
@@ -84,7 +93,7 @@ public class server extends Application{
         GridPane.setConstraints(loginBtn, 1, 0);
         grid.getChildren().add(loginBtn);
 
-        Scene scene = new Scene(grid, 700, 1000);
+        Scene scene = new Scene(grid, 500, 500);
         /*LoginStage.setScene(scene);
         LoginStage.setHeight(250);
         LoginStage.setWidth(250);*/
@@ -93,21 +102,35 @@ public class server extends Application{
 
     private Scene initTicTacToeScene()
     {
-        TicTacToe ttt = new TicTacToe();
+        ttt = new TicTacToe();
         return ttt.createContent();
     }
 
     public void Connect(String host, String port, String name) throws IOException
     {
-        String command = "login " + name;
+        Thread thread = new Thread()
+        {
+            public void run()
+            {
+                try
+                {
+                    socket = new Socket(host, Integer.parseInt(port));
+                    //ttt.socket = socket;
+                    System.out.println(ttt);
+                    out = new PrintWriter(socket.getOutputStream(), true);
+                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-        Socket socket = new Socket(host, Integer.parseInt(port));
-        Scanner in = new Scanner(socket.getInputStream());
-        PrintStream out = new PrintStream(socket.getOutputStream());
-        out.println(command);
+                }
+                catch (IOException e)
+                {
+                    System.err.println("Cant process request");
+                }
+            }
+        };
+        thread.start();
     }
 
-    @Override public void start(Stage stage)
+    @Override public void    start(Stage stage)
     {
         PrimaryStage = stage;
         PrimaryStage.setScene(LoginScene);
@@ -120,15 +143,27 @@ public class server extends Application{
                 try {
                     Connect(ipAddress.getText(), portNumber.getText(), nameField.getText());
                     connected = true;
+                    PrimaryStage.setScene(TicTacToeScene);
+                    PrimaryStage.show();
                 }
-                catch(IOException ex)
+                catch (Exception ex)
                 {
-                    System.out.println("Cant connect. Exception : " + ex);
+                    System.out.println(ex);
                 }
-                PrimaryStage.setScene(TicTacToeScene);
-                PrimaryStage.show();
             }
         });
     }
 
+    public String GetIpAddress()
+    {
+        return ipAddress.getText();
+    }
+    public String GetPort()
+    {
+        return portNumber.getText();
+    }
+    public String GetName()
+    {
+        return nameField.getText();
+    }
 }

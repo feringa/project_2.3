@@ -12,10 +12,14 @@ import javafx.scene.text.Font;
 
 import java.awt.*;
 
-class Tile extends StackPane {
+import Server.server;
+
+public class Tile extends StackPane {
     public Text text = new Text();
 
+    public int TileNumber;
     TicTacToe ttt = new TicTacToe();
+
     public Tile() {
         Rectangle border = new Rectangle(20, 20, 200, 200);
         border.setFill(null);
@@ -31,18 +35,19 @@ class Tile extends StackPane {
                 return;
 
             if (event.getButton() == MouseButton.PRIMARY) {
-                if (!ttt.turnX)
+                if (!ttt.myTurn)
                     return;
 
                 drawX();
-                ttt.turnX = false;
+                ttt.myTurn = false;
+                ttt.DoTurn(TileNumber);
             }
             else if (event.getButton() == MouseButton.SECONDARY) {
-                if (ttt.turnX)
+                if (ttt.myTurn)
                     return;
 
                 drawO();
-                ttt.turnX = true;
+                ttt.myTurn = true;
             }
         });
     }
