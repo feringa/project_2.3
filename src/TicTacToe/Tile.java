@@ -3,22 +3,18 @@ package TicTacToe;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.*;
 import javafx.scene.text.*;
 
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-
-import java.awt.*;
-
-import Server.server;
+import main.*;
 
 public class Tile extends StackPane {
     public Text text = new Text();
 
     public int TileNumber;
-    TicTacToe ttt = new TicTacToe();
+    public TicTacToe ttt;
 
     public Tile() {
         Rectangle border = new Rectangle(20, 20, 200, 200);
@@ -31,23 +27,13 @@ public class Tile extends StackPane {
         getChildren().addAll(border, text);
 
         setOnMouseClicked(event -> {
-            if (!ttt.playable)
-                return;
 
             if (event.getButton() == MouseButton.PRIMARY) {
-                if (!ttt.myTurn)
+                if (ttt.myTurn == false) {
+                    System.out.println("button pressed but its not my turn" + ttt);
                     return;
-
-                drawX();
-                ttt.myTurn = false;
+                }
                 ttt.DoTurn(TileNumber);
-            }
-            else if (event.getButton() == MouseButton.SECONDARY) {
-                if (ttt.myTurn)
-                    return;
-
-                drawO();
-                ttt.myTurn = true;
             }
         });
     }
